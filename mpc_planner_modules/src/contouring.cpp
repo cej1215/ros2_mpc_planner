@@ -36,6 +36,7 @@ namespace MPCPlanner
     double closest_s;
     _spline->findClosestPoint(state.getPos(), _closest_segment, closest_s);
     state.set("spline", closest_s); // We need to initialize the spline state here
+    
     // LOG_INFO("[Contouring] closest_s=" << closest_s);
 
     if (module_data.path.get() == nullptr && _spline.get() != nullptr)
@@ -45,6 +46,23 @@ namespace MPCPlanner
 
     if (_add_road_constraints)
       constructRoadConstraints(data, module_data);
+    
+    Eigen::Vector2d robot_pos = state.getPos();
+    Eigen::Vector2d spline_pos = _spline->getPoint(closest_s);
+
+    double dx = robot_pos.x() - spline_pos.x();
+    double dy = robot_pos.y() - spline_pos.y();
+    double dist_error = std::sqrt(dx * dx + dy * dy);
+
+    // closest_s와 x,y값 및 spline 비교
+    // LOG_INFO("[Closest comparison] "
+    //         << "robot=(" << robot_pos.x() << ", " << robot_pos.y() << ") "
+    //         << "closest_s=" << closest_s
+    //         << " spline=(" << spline_pos.x() << ", " << spline_pos.y() << ") "
+    //         << "dx=" << dx
+    //         << " dy=" << dy
+    //         << " error=" << dist_error
+    //         << " segment=" << _closest_segment);
   }
 
   void Contouring::setParameters(const RealTimeData &data, const ModuleData &module_data, int k)
@@ -272,49 +290,6 @@ namespace MPCPlanner
     PROFILE_SCOPE("Contouring::Visualize");
     LOG_MARK("Contouring::Visualize");
 
-    // 수식의 이산 속도 합을 사용하며 terminal_s - current_s로 대체하지 않는다.
-    const double tau = _solver->dt;
-    const int N = _solver->N;
-    const double v_max = _solver->_model_map["v"][3].as<double>();
-    double traveled_dist = 0.0;
-    for (int j = 0; j < N; ++j)
-        traveled_dist += tau * _solver->getOutput(j, "v");
-    const double max_travel_dist = tau * N * v_max;
-
-    // setSplineParameters()가 선택한 현재 구간부터의 유효 구간을 동일하게 합산한다.
-    // 경로 끝을 넘어 채워지는 상수 구간은 길이에 포함하지 않는다.
-    const int begin = _closest_segment;
-    const int end = std::min(
-        _closest_segment + _n_segments, _spline->numSegments());
-    const auto &distances = _spline->getDistanceVector();
-    const double waypoints_dist =
-        begin < end ? distances[end] - distances[begin] : 0.0;
-
-    // 각 cubic spline 구간의 ||p'(s)||를 복합 Simpson 공식으로 수치 적분한다.
-    // waypoint 거리나 매개변수 차이가 아닌 C++ 참조 spline의 호 길이 근삿값이다.
-    constexpr int integration_steps = 32;
-    double ref_path_length = 0.0;
-    for (int i = begin; i < end; ++i)
-    {
-        const double s_begin = _spline->getSegmentStart(i);
-        const double s_end = _spline->getSegmentStart(i + 1);
-        const double step = (s_end - s_begin) / integration_steps;
-        double sum = _spline->getVelocity(s_begin).norm() +
-                     _spline->getVelocity(s_end).norm();
-        for (int j = 1; j < integration_steps; ++j)
-        {
-            const double weight = (j % 2 == 0) ? 2.0 : 4.0;
-            sum += weight * _spline->getVelocity(s_begin + j * step).norm();
-        }
-        ref_path_length += step * sum / 3.0;
-    }
-
-    LOG_INFO(
-        "[Reference distance] traveled_dist=" << traveled_dist
-        << ", max_travel_dist=" << max_travel_dist
-        << ", waypoints_dist=" << waypoints_dist
-        << ", ref_path_length=" << ref_path_length);
-
     visualizeReferencePath(data, module_data);
     visualizeRoadConstraints(data, module_data);
 
@@ -361,7 +336,7 @@ namespace MPCPlanner
       for (double s = s_start + 0.001; s < _spline->getSegmentStart(i + 1); s += 0.001)
       {
         if (s > 0)
-          line.addLine(_spline->getPoint(s - 1.0), _spline->getPoint(s));
+          line.addLine(_spline->getPoint(s - 0.001), _spline->getPoint(s));
       }
     }
 

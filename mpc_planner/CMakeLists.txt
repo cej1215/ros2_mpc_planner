@@ -30,6 +30,7 @@ add_library(${PROJECT_NAME} SHARED
   src/planner.cpp
   src/data_preparation.cpp
   src/experiment_util.cpp
+  src/cost_debug.cpp
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(mpc_planner_msgs)
 
 set(DEPENDENCIES
+  builtin_interfaces
   std_msgs
   geometry_msgs
   nav_msgs
@@ -15,6 +16,7 @@ foreach(pkg IN LISTS DEPENDENCIES)
 endforeach()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/CostDebug.msg"
   "msg/ObstacleArray.msg"
   "msg/Gaussian.msg"
   "msg/ObstacleGMM.msg"

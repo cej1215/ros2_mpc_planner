@@ -1,0 +1,26 @@
+builtin_interfaces/Time stamp
+bool solver_success
+bool valid
+string error
+
+int32 stage_count
+float64 stage_cost_scale
+
+float64 raw_acceleration
+float64 raw_angular_velocity
+float64 raw_velocity
+float64 raw_lag
+float64 raw_contour
+float64 raw_total
+
+float64 scaled_acceleration
+float64 scaled_angular_velocity
+float64 scaled_velocity
+float64 scaled_lag
+float64 scaled_contour
+float64 scaled_total
+
+float64 terminal_heading
+float64 terminal_lag
+float64 terminal_contour
+float64 terminal_total

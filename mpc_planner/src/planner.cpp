@@ -17,6 +17,8 @@
 #include <ros_tools/visuals.h>
 #include <ros_tools/data_saver.h>
 
+#include <exception>
+
 namespace MPCPlanner
 {
 
@@ -84,9 +86,7 @@ namespace MPCPlanner
                 // _solver->initializeWithState(state);
                 _solver->initializeWithBraking(state);
             }
-
-            _solver->setXinit(state); // Set the initial state
-
+            
             // Update all modules
             {
                 LOG_MARK("Updating modules");
@@ -95,6 +95,8 @@ namespace MPCPlanner
                 for (auto &module : _modules)
                     module->update(state, data, _module_data);
             }
+
+            _solver->setXinit(state); // Set the initial state
 
             {
                 LOG_MARK("Setting parameters");
@@ -146,6 +148,19 @@ namespace MPCPlanner
         }
 
         _output.success = true;
+        try
+        {
+            _output.cost_debug = evaluateStageCosts(
+                *_solver,
+                CONFIG["contouring"]["num_segments"].as<int>(),
+                _solver->dt);
+        }
+        catch (const std::exception &e)
+        {
+            _output.cost_debug.valid = false;
+            _output.cost_debug.error = e.what();
+        }
+
         for (int k = 1; k < _solver->N; k++)
             _output.trajectory.add(_solver->getOutput(k, "x"), _solver->getOutput(k, "y"));
 

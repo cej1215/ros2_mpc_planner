@@ -90,7 +90,7 @@ weights: # Weights of the MPC, need to correspond to declared weights in the sol
   acceleration: 0.34
   angular_velocity: 0.3
   reference_velocity: 2.0 #1.5
-  contour: 0.05
+  contour: 1.0
   preview: 0.0
   lag: 0.75
   # slack: 10000.

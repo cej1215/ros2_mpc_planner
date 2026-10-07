@@ -2,6 +2,7 @@
 #define ANTBOT_PLANNER_H
 
 #include <mpc_planner/planner.h>
+#include <mpc_planner_msgs/msg/cost_debug.hpp>
 #include <mpc_planner_solver/state.h>
 #include <mpc_planner_types/realtime_data.h>
 #include <ros_tools/profiling.h>
@@ -83,6 +84,7 @@ private:
     rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr _costmap_sub;
     rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr _collisions_sub;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr _cmd_pub;
+    rclcpp::Publisher<mpc_planner_msgs::msg::CostDebug>::SharedPtr _cost_debug_pub;
     rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _pose_pub;
     rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr _reset_simulation_pub;
     rclcpp::Client<std_srvs::srv::Empty>::SharedPtr _reset_simulation_client;

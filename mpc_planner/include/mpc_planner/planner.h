@@ -3,6 +3,7 @@
 
 #include <mpc_planner_types/data_types.h>
 #include <mpc_planner_types/module_data.h>
+#include <mpc_planner/cost_debug.h>
 
 #include <memory>
 #include <vector>
@@ -25,6 +26,7 @@ namespace MPCPlanner
     {
         Trajectory trajectory;
         bool success{false};
+        CostDebug cost_debug;
 
         PlannerOutput(double dt, int N) : trajectory(dt, N) {}
 

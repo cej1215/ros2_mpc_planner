@@ -161,6 +161,9 @@ using namespace MPCPlanner;
         _collisions_sub = this->create_subscription<std_msgs::msg::Float64>(
             "~/feedback/collisions", 1,
             std::bind(&AntbotPlanner::collisionCallback, this, std::placeholders::_1));
+        
+        _cost_debug_pub =this->create_publisher<mpc_planner_msgs::msg::CostDebug>(
+            "~/output/cost_debug", 1);
 
         // Service responses use a separate callback group so synchronous waits also
         // work when reset() is called from a subscription callback.
@@ -257,7 +260,49 @@ using namespace MPCPlanner;
         auto &loop_benchmarker = BENCHMARKERS.getBenchmarker("loop");
         loop_benchmarker.start();
 
+        // solve the MPC problem
         auto output = _planner->solveMPC(_state, _data);
+
+        //cost debug msg
+        mpc_planner_msgs::msg::CostDebug cost_msg;
+
+        cost_msg.stamp = this->now();
+        cost_msg.solver_success = output.success;
+
+        cost_msg.valid = output.success && output.cost_debug.valid;
+        cost_msg.error = output.cost_debug.error;
+
+        cost_msg.scaled_acceleration =
+            output.cost_debug.scaled.acceleration;
+
+        cost_msg.scaled_angular_velocity =
+            output.cost_debug.scaled.angular_velocity;
+
+        cost_msg.scaled_velocity =
+            output.cost_debug.scaled.velocity;
+
+        cost_msg.scaled_lag =
+            output.cost_debug.scaled.lag;
+
+        cost_msg.scaled_contour =
+            output.cost_debug.scaled.contour;
+
+        cost_msg.scaled_total =
+            output.cost_debug.scaled.total();
+
+        cost_msg.terminal_heading =
+            output.cost_debug.terminal.heading;
+
+        cost_msg.terminal_lag =
+            output.cost_debug.terminal.lag;
+
+        cost_msg.terminal_contour =
+            output.cost_debug.terminal.contour;
+
+        cost_msg.terminal_total =
+            output.cost_debug.terminal.total();
+
+        _cost_debug_pub->publish(cost_msg);
 
         LOG_MARK("Success: " << output.success);
 
