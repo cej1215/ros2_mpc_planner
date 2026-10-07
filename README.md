@@ -16,7 +16,7 @@ In your ROS 2 workspace `ws/src`, clone the following repositories:
 ```bash
 cd <path_mpc_workspace>/src
 
-git clone https://github.com/tud-amr/mpc_planner.git
+git clone https://github.com/cej1215/ros2_mpc_planner.git mpc_planner
 git clone https://github.com/oscardegroot/DecompUtil.git
 git clone https://github.com/oscardegroot/ros_tools.git
 git clone https://github.com/ROBOTIS-move/antbot.git
