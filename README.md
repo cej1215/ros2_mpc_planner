@@ -53,6 +53,8 @@ The MPC solver is generated using Python and **Acados**.
 
 ### Conda
 
+MPC solver 생성용 Python 환경과 ROS 2에서의 python 환경을 분리하기 위함
+
 If you have [Miniconda](https://docs.anaconda.com/miniconda/) installed, create a separate Python environment for the solver generation.
 
 From:
