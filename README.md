@@ -114,7 +114,7 @@ conda activate mpc_planner
 install the Acados Python interface:
 
 ```bash
-python -m pip install -e ~/acados/interfaces/acados_templat
+python -m pip install -e ~/acados/interfaces/acados_template
 ```
 #### if you don't have pip, run `conda install pip`
 
