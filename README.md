@@ -75,10 +75,10 @@ conda activate mpc_planner
 
 ### Install Acados
 
-This project uses the following Acados revision:
+This project uses the following Acados version:
 
 ```text
-v0.4.1-50-gc48cf1135
+v0.6.0-55-gf186f2a5c
 ```
 
 Clone Acados and checkout the corresponding commit:
@@ -86,17 +86,9 @@ Clone Acados and checkout the corresponding commit:
 ```bash
 git clone https://github.com/acados/acados.git
 cd acados
-
-git checkout c48cf1135
 git submodule update --recursive --init
-```
-
-Build Acados:
-
-```bash
 mkdir -p build
 cd build
-
 cmake -DACADOS_SILENT=ON ..
 make install -j4
 ```
