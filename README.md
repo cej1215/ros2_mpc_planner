@@ -66,14 +66,9 @@ cd <path_mpc_workspace>/src/mpc_planner
 create and activate the environment:
 
 ```bash
-conda create -n mpc_planner python=3.9 pip -y
+conda config --append channels conda-forge
+conda create -n mpc_planner --file requirements.txt
 conda activate mpc_planner
-```
-
-Then install the required Python packages:
-
-```bash
-pip install -r requirements.txt
 ```
 
 ---
@@ -119,8 +114,10 @@ conda activate mpc_planner
 install the Acados Python interface:
 
 ```bash
-pip install -e ~/acados/interfaces/acados_template
+python -m pip install -e ~/acados/interfaces/acados_templat
 ```
+#### if you don't have pip, run `conda install pip`
+
 
 Then add the Acados paths to your `~/.bashrc`:
 
