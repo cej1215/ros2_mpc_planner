@@ -119,7 +119,7 @@ conda activate mpc_planner
 install the Acados Python interface:
 
 ```bash
-pip install -e <path_to_acados>/interfaces/acados_template
+pip install -e ~/acados/interfaces/acados_template
 ```
 
 Then add the Acados paths to your `~/.bashrc`:
