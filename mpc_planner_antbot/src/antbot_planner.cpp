@@ -106,8 +106,9 @@ using namespace MPCPlanner;
         global_plan_.clear();
         global_plan_ = orig_global_plan;
 
-        // we do not clear the local planner here, since setPlan is called frequently whenever the global planner updates the plan.
-        // the local planner checks whether it is required to reinitialize the trajectory or not within each velocity computation step.
+        // 
+        
+        
 
         // reset goal_reached_ flag
         // goal_reached_ = false;

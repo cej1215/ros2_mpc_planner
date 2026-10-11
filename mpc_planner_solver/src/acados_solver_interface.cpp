@@ -123,12 +123,12 @@ namespace MPCPlanner
     {
         // real spline input check 
         int spline_idx = _model_map["spline"][1].as<int>() - nu;
-        
+
         // LOG_INFO("[ACADOS XINIT] spline=" << _params.xinit[spline_idx]);
 
         // Set initial state
-        ocp_nlp_constraints_model_set(_nlp_config, _nlp_dims, _nlp_in, 0, "lbx", _params.xinit);
-        ocp_nlp_constraints_model_set(_nlp_config, _nlp_dims, _nlp_in, 0, "ubx", _params.xinit);
+        ocp_nlp_constraints_model_set(_nlp_config, _nlp_dims, _nlp_in, _nlp_out, 0, "lbx", _params.xinit);
+        ocp_nlp_constraints_model_set(_nlp_config, _nlp_dims, _nlp_in, _nlp_out, 0, "ubx", _params.xinit);
 
         // Set parameters
         for (int k = 0; k <= N; k++)
@@ -165,87 +165,40 @@ namespace MPCPlanner
         return status;
     }
 
-    int Solver::completeOneIteration()
+        int Solver::completeOneIteration()
     {
         ocp_nlp_get(_nlp_solver, "nlp_res", &_info.nlp_res);
-
         // Compute and retrieve the cost
         ocp_nlp_eval_cost(_nlp_solver, _nlp_in, _nlp_out);
         ocp_nlp_get(_nlp_solver, "cost_value", &_info.pobj);
-
         // Get output
         for (int k = 0; k <= _nlp_dims->N; k++)
             ocp_nlp_out_get(_nlp_config, _nlp_dims, _nlp_out, k, "x", &_output.xtraj[k * nx]);
         for (int k = 0; k < _nlp_dims->N; k++)
             ocp_nlp_out_get(_nlp_config, _nlp_dims, _nlp_out, k, "u", &_output.utraj[k * nu]);
-
         double res_stat, res_eq, res_ineq, res_comp;
         ocp_nlp_get(_nlp_solver, "res_eq", &res_eq);
         if (res_eq > 1e-2 && _exit_code_one_iter == ACADOS_SUCCESS)
         {
             _exit_code_one_iter = ACADOS_QP_FAILURE;
         }
-
         if (_exit_code_one_iter == ACADOS_SUCCESS)
         {
             LOG_MARK("Solver_acados_solve(): SUCCESS!");
         }
         else
         {
-            Solver_acados_reset(_acados_ocp_capsule, 1);
+            Solver_acados_reset(_acados_ocp_capsule, 1, 0, 0, 0);
             ocp_nlp_solver_reset_qp_memory(_nlp_solver, _nlp_in, _nlp_out);
         }
-
         // Get INFO
         ocp_nlp_out_get(_nlp_config, _nlp_dims, _nlp_out, 0, "kkt_norm_inf", &_info.kkt_norm_inf);
         ocp_nlp_get(_nlp_solver, "sqp_iter", &_info.sqp_iter);
-
         // Map to FORCES output
         if (_exit_code_one_iter == ACADOS_SUCCESS) // Success
             _exit_code_one_iter = 1;
         else if (_exit_code_one_iter == 1)
             _exit_code_one_iter = 0;
-
-        return _exit_code_one_iter;
-        ocp_nlp_get(_nlp_solver, "nlp_res", &_info.nlp_res);
-
-        // Compute and retrieve the cost
-        ocp_nlp_eval_cost(_nlp_solver, _nlp_in, _nlp_out);
-        ocp_nlp_get(_nlp_solver, "cost_value", &_info.pobj);
-
-        // Get output
-        for (int k = 0; k <= _nlp_dims->N; k++)
-            ocp_nlp_out_get(_nlp_config, _nlp_dims, _nlp_out, k, "x", &_output.xtraj[k * nx]);
-        for (int k = 0; k < _nlp_dims->N; k++)
-            ocp_nlp_out_get(_nlp_config, _nlp_dims, _nlp_out, k, "u", &_output.utraj[k * nu]);
-
-        // double res_stat, res_eq, res_ineq, res_comp;
-        ocp_nlp_get(_nlp_solver, "res_eq", &res_eq);
-        if (res_eq > 1e-2 && _exit_code_one_iter == ACADOS_SUCCESS)
-        {
-            _exit_code_one_iter = ACADOS_QP_FAILURE;
-        }
-
-        if (_exit_code_one_iter == ACADOS_SUCCESS)
-        {
-            LOG_MARK("Solver_acados_solve(): SUCCESS!");
-        }
-        else
-        {
-            Solver_acados_reset(_acados_ocp_capsule, 1);
-            ocp_nlp_solver_reset_qp_memory(_nlp_solver, _nlp_in, _nlp_out);
-        }
-
-        // Get INFO
-        ocp_nlp_out_get(_nlp_config, _nlp_dims, _nlp_out, 0, "kkt_norm_inf", &_info.kkt_norm_inf);
-        ocp_nlp_get(_nlp_solver, "sqp_iter", &_info.sqp_iter);
-
-        // Map to FORCES output
-        if (_exit_code_one_iter == ACADOS_SUCCESS) // Success
-            _exit_code_one_iter = 1;
-        else if (_exit_code_one_iter == 1)
-            _exit_code_one_iter = 0;
-
         return _exit_code_one_iter;
     }
 
@@ -322,11 +275,11 @@ namespace MPCPlanner
         // Load from x0 into traj_x and traj_u
         for (int k = 0; k < N; k++)
         {
-            ocp_nlp_out_set(_nlp_config, _nlp_dims, _nlp_out, k, "x", &_params.x0[nvar * k + nu]);
-            ocp_nlp_out_set(_nlp_config, _nlp_dims, _nlp_out, k, "u", &_params.x0[nvar * k]);
+            ocp_nlp_out_set(_nlp_config, _nlp_dims, _nlp_out, _nlp_in, k, "x", &_params.x0[nvar * k + nu]);
+            ocp_nlp_out_set(_nlp_config, _nlp_dims, _nlp_out, _nlp_in, k, "u", &_params.x0[nvar * k]);
         }
 
-        ocp_nlp_out_set(_nlp_config, _nlp_dims, _nlp_out, N, "x", &_params.x0[nvar * N + nu]);
+        ocp_nlp_out_set(_nlp_config, _nlp_dims, _nlp_out, _nlp_in, N, "x", &_params.x0[nvar * N + nu]);
     }
 
     void Solver::initializeWithState(const State &initial_state)

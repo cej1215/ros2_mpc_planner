@@ -83,6 +83,7 @@ def generate_acados_solver(modules, settings, model, skip_solver_generation):
     # Create an acados ocp object
     ocp = AcadosOcp()
     ocp.model = model_acados
+    ocp.name = model_acados.name
 
     # Set ocp dimensions
     ocp.dims.N = settings["N"]
@@ -187,7 +188,7 @@ def generate_acados_solver(modules, settings, model, skip_solver_generation):
         return None, None
     else:
         print_header("Generating solver")
-        solver = AcadosOcpSolver(acados_ocp=ocp, json_file=json_file_name)
+        solver = AcadosOcpSolver(ocp, json_file=json_file_name)
 
         simulator = AcadosSimSolver(ocp, json_file=json_file_name)
         print_header("Output")
