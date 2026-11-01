@@ -46,6 +46,7 @@ public:
 		node->declare_parameter<double>("lag", CONFIG["weights"]["lag"].as<double>());
 		node->declare_parameter<double>("terminal_angle", CONFIG["weights"]["terminal_angle"].as<double>());
 		node->declare_parameter<double>("terminal_contouring", CONFIG["weights"]["terminal_contouring"].as<double>());
+		node->declare_parameter<double>("goal_weight", CONFIG["weights"]["goal"].as<double>());
 	}
 
 	virtual rcl_interfaces::msg::SetParametersResult updateROSParameters(const std::vector<rclcpp::Parameter> &parameters)
@@ -58,6 +59,7 @@ public:
 		updateParam<double>(parameters, "lag", CONFIG["weights"]["lag"]);
 		updateParam<double>(parameters, "terminal_angle", CONFIG["weights"]["terminal_angle"]);
 		updateParam<double>(parameters, "terminal_contouring", CONFIG["weights"]["terminal_contouring"]);
+		updateParam<double>(parameters, "goal_weight", CONFIG["weights"]["goal"]);
 
 		auto result = rcl_interfaces::msg::SetParametersResult();
 		result.successful = true;

@@ -44,7 +44,7 @@ def configuration_mpc(settings):
 
     modules.add_module(ContouringModule(settings))
     # modules.add_module(DecompConstraintModule(settings))
-    # modules.add_module(GoalModule(settings))
+    modules.add_module(GoalModule(settings))
 
     return model, modules
 

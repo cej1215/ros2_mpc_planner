@@ -3,6 +3,7 @@
 
 #include <mpc_planner_modules/mpc_base.h>
 #include <mpc_planner_modules/contouring.h>
+#include <mpc_planner_modules/goal_module.h>
 
 namespace MPCPlanner
 {
@@ -13,6 +14,8 @@ namespace MPCPlanner
 		modules.back() = std::make_shared<MPCBaseModule>(solver);
 		modules.emplace_back(nullptr);
 		modules.back() = std::make_shared<Contouring>(solver);
+		modules.emplace_back(nullptr);
+		modules.back() = std::make_shared<GoalModule>(solver);
 
 	}
 }

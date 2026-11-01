@@ -6,4 +6,5 @@ set(MODULE_DEPENDENCIES
 set(MODULE_SOURCES
 	src/mpc_base.cpp
 	src/contouring.cpp
+	src/goal_module.cpp
 )

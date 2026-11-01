@@ -82,20 +82,20 @@ probabilistic:
   propagate_uncertainty: true # Propagate the received uncertainty over time
 
 weights: # Weights of the MPC, need to correspond to declared weights in the solver
-  # goal: 1. #10.
-  # goal_x: 1.
-  # goal_y: 1.
+  goal: 1. #10.
+  goal_x: 1.
+  goal_y: 1.
   
   velocity: 0.55
   acceleration: 0.34
   angular_velocity: 0.3
-  reference_velocity: 2.0 #1.5
-  contour: 1.0
+  reference_velocity: 2.0 # 1.5
+  contour: 1.0 # 1.0
   preview: 0.0
-  lag: 0.75
+  lag: 0.75 # 0.75
   # slack: 10000.
   terminal_angle: 100.0 # 0.0
-  terminal_contouring: 10.0 # 0.0
+  terminal_contouring: 0.0 # 0.0
 
 visualization:
   draw_every: 5 # Visualize every x stages

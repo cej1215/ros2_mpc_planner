@@ -53,8 +53,6 @@ The MPC solver is generated using Python and **Acados**.
 
 ### Conda
 
-MPC solver 생성용 Python 환경과 ROS 2에서의 python 환경을 분리하기 위함
-
 If you have [Miniconda](https://docs.anaconda.com/miniconda/) installed, create a separate Python environment for the solver generation.
 
 From:
@@ -66,19 +64,24 @@ cd <path_mpc_workspace>/src/mpc_planner
 create and activate the environment:
 
 ```bash
-conda config --append channels conda-forge
-conda create -n mpc_planner --file requirements.txt
+conda create -n mpc_planner python=3.9 pip -y
 conda activate mpc_planner
+```
+
+Then install the required Python packages:
+
+```bash
+pip install -r requirements.txt
 ```
 
 ---
 
 ### Install Acados
 
-This project uses the following Acados version:
+This project uses the following Acados revision:
 
 ```text
-v0.6.0-55-gf186f2a5c
+v0.4.1-50-gc48cf1135
 ```
 
 Clone Acados and checkout the corresponding commit:
@@ -86,9 +89,17 @@ Clone Acados and checkout the corresponding commit:
 ```bash
 git clone https://github.com/acados/acados.git
 cd acados
+
+git checkout c48cf1135
 git submodule update --recursive --init
+```
+
+Build Acados:
+
+```bash
 mkdir -p build
 cd build
+
 cmake -DACADOS_SILENT=ON ..
 make install -j4
 ```
@@ -106,10 +117,8 @@ conda activate mpc_planner
 install the Acados Python interface:
 
 ```bash
-python -m pip install -e ~/acados/interfaces/acados_template
+pip install -e <path_to_acados>/interfaces/acados_template
 ```
-#### if you don't have pip, run `conda install pip`
-
 
 Then add the Acados paths to your `~/.bashrc`:
 
@@ -165,11 +174,16 @@ If the solver generation completes successfully, the generated Acados solver wil
 
 ## Step 4: Build the planner
 
-Return to the ROS 2 workspace (make sure to deactivate conda first):
+Return to the ROS 2 workspace:
 
 ```bash
-conda deactivate
 cd <path_mpc_workspace>
+```
+
+Source ROS 2 Humble:
+
+```bash
+source /opt/ros/humble/setup.bash
 ```
 
 Build the workspace:
@@ -191,20 +205,3 @@ source ~/.bashrc
 ```
 
 The Antbot MPC Planner is now ready to use.
-
-## Step 5: Run the planner
-
-Open a new terminal and launch the Antbot Gazebo simulation:
-
-```bash
-ros2 launch antbot_gazebo gazebo.launch.py world:=depot
-```
-
-Then, open another terminal and launch the Antbot MPC Planner:
-
-```bash
-ros2 launch mpc_planner_antbot antbot_planner.launch.py
-```
-
-After both the Gazebo simulation and MPC Planner are running, use 2D Goal Pose in RViz to select a desired goal position and orientation.
-

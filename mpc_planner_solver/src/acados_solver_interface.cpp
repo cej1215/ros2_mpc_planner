@@ -4,6 +4,8 @@
 
 #include <ros_tools/profiling.h>
 
+#include <algorithm>
+
 namespace MPCPlanner
 {
     Solver::Solver(int solver_id)
@@ -165,9 +167,8 @@ namespace MPCPlanner
         return status;
     }
 
-        int Solver::completeOneIteration()
+    int Solver::completeOneIteration()
     {
-        ocp_nlp_get(_nlp_solver, "nlp_res", &_info.nlp_res);
         // Compute and retrieve the cost
         ocp_nlp_eval_cost(_nlp_solver, _nlp_in, _nlp_out);
         ocp_nlp_get(_nlp_solver, "cost_value", &_info.pobj);
@@ -176,12 +177,31 @@ namespace MPCPlanner
             ocp_nlp_out_get(_nlp_config, _nlp_dims, _nlp_out, k, "x", &_output.xtraj[k * nx]);
         for (int k = 0; k < _nlp_dims->N; k++)
             ocp_nlp_out_get(_nlp_config, _nlp_dims, _nlp_out, k, "u", &_output.utraj[k * nu]);
-        double res_stat, res_eq, res_ineq, res_comp;
+        double res_stat = 0.0;
+        double res_eq = 0.0;
+        double res_ineq = 0.0;
+        double res_comp = 0.0;
         ocp_nlp_get(_nlp_solver, "res_eq", &res_eq);
         if (res_eq > 1e-2 && _exit_code_one_iter == ACADOS_SUCCESS)
         {
             _exit_code_one_iter = ACADOS_QP_FAILURE;
         }
+
+        // Recompute final-iterate residuals before any solver reset.
+        // Keep the existing status check above independent of diagnostic evaluation.
+        ocp_nlp_eval_residuals(_nlp_solver, _nlp_in, _nlp_out);
+        ocp_nlp_get(_nlp_solver, "res_stat", &res_stat);
+        ocp_nlp_get(_nlp_solver, "res_eq", &res_eq);
+        ocp_nlp_get(_nlp_solver, "res_ineq", &res_ineq);
+        ocp_nlp_get(_nlp_solver, "res_comp", &res_comp);
+        _info.nlp_res = std::max({res_stat, res_eq, res_ineq, res_comp});
+
+        // LOG_INFO(
+        //     "res_stat=" << res_stat
+        //     << ", res_eq=" << res_eq
+        //     << ", res_ineq=" << res_ineq
+        //     << ", res_comp=" << res_comp);
+
         if (_exit_code_one_iter == ACADOS_SUCCESS)
         {
             LOG_MARK("Solver_acados_solve(): SUCCESS!");
@@ -363,13 +383,24 @@ namespace MPCPlanner
         }
         else
         {
-
             /** @note warmstart maintaining the previous output */
             // [initial_state, x_1, x_2, ..., x_N-1, x_N]
-            for (int k = 0; k < N; k++) // For all timesteps
+
+            for (int k = 0; k <= N; k++) // For all timesteps
             {
-                for (YAML::const_iterator it = _model_map.begin(); it != _model_map.end(); ++it)                 // For all inputs and states
-                    setEgoPrediction(k, it->first.as<std::string>(), getOutput(k, it->first.as<std::string>())); // Initialize with the previous output
+                for (YAML::const_iterator it = _model_map.begin();
+                    it != _model_map.end(); ++it)
+                {
+                    // Terminal Stage N에는 입력변수(a, w)가 존재하지 않음
+                    if (k == N && it->second[0].as<std::string>() == "u")
+                        continue;
+
+                    setEgoPrediction(
+                        k,
+                        it->first.as<std::string>(),
+                        getOutput(k, it->first.as<std::string>())
+                    );
+                }
             }
         }
     }

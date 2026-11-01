@@ -221,7 +221,7 @@ namespace MPCPlanner
             result.scaled.contour =
                 stage_cost_scale * result.raw.contour;
 
-            // Terminal 상태는 N, 파라미터는 현재 인터페이스와 동일하게 N-1 사용
+            // Terminal 상태는 N, 가중치 및 spline 계수값은 N-1 stage에서 읽는다.
             {
                 const int state_stage = solver.N;
                 const int parameter_stage = solver.N - 1;
@@ -279,11 +279,6 @@ namespace MPCPlanner
                 const double angle_error =
                     std::fmod(psi_N - path_angle + pi, 2.0 * pi) - pi;
 
-                LOG_INFO(
-                    "Terminal cost debug: "
-                    << ", heading_error=" << angle_error * 180.0 / pi
-                );
-
                 // 현재 생성된 solver의 terminal 비용 배율은 1.0
                 result.terminal.heading =
                     W_psi * angle_error * angle_error;
@@ -293,6 +288,13 @@ namespace MPCPlanner
 
                 result.terminal.contour =
                     m_term * W_c * contour_error * contour_error;
+
+                // LOG_INFO(
+                //     "Terminal cost debug: "
+                //     << "psi_N=" << psi_N * 180.0 / pi
+                //     << ", path_angle=" << path_angle * 180.0 / pi
+                //     << ", heading_error=" << angle_error * 180.0 / pi
+                );
             }
 
             // raw cost 합계값과 배율이 적용된 cost total값 중 하나라도 오류가 있는지 검사

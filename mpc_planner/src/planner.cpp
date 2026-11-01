@@ -17,7 +17,9 @@
 #include <ros_tools/visuals.h>
 #include <ros_tools/data_saver.h>
 
+#include <cmath>
 #include <exception>
+#include <sstream>
 
 namespace MPCPlanner
 {
@@ -80,7 +82,23 @@ namespace MPCPlanner
             bool shift_forward = CONFIG["shift_previous_solution_forward"].as<bool>() &&
                                  CONFIG["enable_output"].as<bool>();
             if (was_feasible)
+            {
+                const double rad_to_deg = 180.0 / std::acos(-1.0);
+                const double current_psi = state.get("psi");
+                const double previous_psi_0 = _solver->getOutput(0, "psi");
+                const double previous_psi_N = _solver->getOutput(_solver->N, "psi");
+
+                // Keep the raw difference to expose possible +/-360 degree jumps.
+                // LOG_INFO(
+                //     "MPC warmstart yaw [deg]:"
+                //     << " current_psi=" << current_psi * rad_to_deg
+                //     << ", previous_psi_0=" << previous_psi_0 * rad_to_deg
+                //     << ", previous_psi_N=" << previous_psi_N * rad_to_deg
+                //     << ", initial_yaw_diff="
+                //     << (current_psi - previous_psi_0) * rad_to_deg);
+
                 _solver->initializeWarmstart(state, shift_forward);
+            }
             else
             {
                 // _solver->initializeWithState(state);
@@ -148,6 +166,7 @@ namespace MPCPlanner
         }
 
         _output.success = true;
+
         try
         {
             _output.cost_debug = evaluateStageCosts(

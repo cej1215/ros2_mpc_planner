@@ -34,6 +34,7 @@ public:
 			config.lag = CONFIG["weights"]["lag"].as<double>();
 			config.terminal_angle = CONFIG["weights"]["terminal_angle"].as<double>();
 			config.terminal_contouring = CONFIG["weights"]["terminal_contouring"].as<double>();
+			config.goal_weight = CONFIG["weights"]["goal"].as<double>();
 			_first_reconfigure_callback = false;
 		}else{
 			CONFIG["weights"]["acceleration"] = config.acceleration;
@@ -44,6 +45,7 @@ public:
 			CONFIG["weights"]["lag"] = config.lag;
 			CONFIG["weights"]["terminal_angle"] = config.terminal_angle;
 			CONFIG["weights"]["terminal_contouring"] = config.terminal_contouring;
+			CONFIG["weights"]["goal"] = config.goal_weight;
 		}
 	}
 
